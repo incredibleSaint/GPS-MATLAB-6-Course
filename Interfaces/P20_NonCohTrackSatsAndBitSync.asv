@@ -86,7 +86,6 @@ function Res = P20_NonCohTrackSatsAndBitSync(inRes, Params)
         NumOfNeededSamples = necessMin;
     else
         NumOfNeededSamples = Res.File.SamplesLen;
-        MaxNumCA2Process = Res.File.SamplesLen / CALen - 2;
     end
 
     sig = ReadSignalFromFile(inRes.File, ...
@@ -100,32 +99,24 @@ function Res = P20_NonCohTrackSatsAndBitSync(inRes, Params)
                 datestr(now), Res.Search.SatNums(k), k, ...
                 Res.Search.NumSats);
             
-            CA = GenCACode(Res.Search.SatNums(k));
+            CA = GenCACode(Res.Search.SatNums);
             CA = repelem(CA, Res.File.R);
             CA = 2 * CA - 1;
             dt = 1 / inRes.File.Fs0;
             
-            
-            corr = zeros(MaxNumCA2Process, eplNumber);
-            for indCA = 1 : MaxNumCA2Process
-                for epl = 1 : eplNumber
-                    for m = 1 : HalfNumCA4Sync
-                       sigPart = ...
-                                sig((Res.Search.SamplesShifts(k)    + ... % начальный сдвиг из P10_NonCohSearchSats
-                                NumCA2NextSync * (indCA -1) * CALen + ... % индекс рассчитываемого CA-кода
-                                                   (m -1) * CALen)  + ... % сдвиг при накоплении
-                                                   (1 : CALen)      + ... % сам массив CA-кода
-                                                    epl - 1 - HalfCorLen);% рассматриваемые задержки/набеги синхронизации
-                       sigCorrFreq = sigPart .* exp(1j * 2 * pi * ...
-                           (-Res.Search.FreqShifts(k)) * dt * (1 : CALen));
-                       corr(indCA, epl) = corr(indCA, epl) + ...
-                                                   abs(sigCorrFreq * CA.');
+            corr = zeros(1, eplNumber);
+            for epl = 1 : eplNumber
+                for m = 1 : HalfNumCA4Sync * 2
+                   sigPart = ...
+                            sig((Res.Search.SamplesShifts(k) + (m -1) * CALen) ...
+                                                                + (1 : CALen));
+                   sigCorrFreq = sigPart .* exp(1j * 2 * pi * ...
+                       (-Res.Search.FreqShifts(k)) * dt * (1 : CALen));
+                   corr(epl) = corr(epl) + abs(sigCorrFreq * CA.');
 
-                    end
                 end
             end
-            figure;
-            surf((corr));
+            Res.Search.SamplesShifts(k)
                 
         % —трока состо€ни€
             fprintf('%s         «авершено.\n', datestr(now));

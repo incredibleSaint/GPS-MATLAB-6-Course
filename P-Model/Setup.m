@@ -2,7 +2,7 @@ function Params = Setup()
 
 % Main
     % Номер процедуры, с которой надо начать выполнение Main
-        Main.StartProcNum = 1; %  1 <= StartProcNum <= length(FuncNames)
+        Main.StartProcNum = 2; %  1 <= StartProcNum <= length(FuncNames)
 
     % Номер процедуры, на которой надо закончить выполнение Main
         Main.StopProcNum = 7; %  1 <= StopProcNum <= length(FuncNames) и
@@ -11,17 +11,18 @@ function Params = Setup()
 	% Выбор типа обработки - устанавливается для StartProcNum = 1, чтобы
 	%   не быть случайно изменённым в дальнейшем
     % 'Coh'/'NonCoh' - когерентная обработка / некогерентная обработка
-        Main.ProcessType = 'NonCoh';
-
+        Main.ProcessType = 'Coh';
+ 
     % Флаг необходимости прорисовки результатов
         Main.isDraw = 3; % 0 - не рисовать; 1 - рисовать; 2 - рисовать и
             % сохранять; 3 - рисовать, сохранять и закрывать
 
     % Выбор имени файла-записи
-        % Директория с файлами-записями
-            Main.SigDirName = 'C:\Users\Incredible\Desktop\Studies\Programming\MATLAB\NIR\GPS\Signal';
+% Директория с файлами-записями
+            Main.SigDirName = 'D:\Windows\Programming\Matlab\GNSS\GPS-MATLAB-6-Course\Signals\';
         % Имя файла-записи
             Main.SigFileName = '30_08_2018__19_38_33_x02_1ch_16b_15pos_90000ms.dat';
+
 
     % Имя файла для загрузки результатов
     % Если StartProcNum = 1, то не надо ничего загружать

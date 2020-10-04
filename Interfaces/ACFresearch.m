@@ -1,3 +1,4 @@
+% Тело неопределенности АКФ, а также его сечения при df = 0 и t = 0:
 clear; close all;
 logScale = 0;
 PSC = GenCACode( 1 );
@@ -42,7 +43,7 @@ grid on;
 %----------------- delta(t) = 0 ----------------------------
 figure;
 % plot(PSCsh(1, length( PSC )));
-plot(PSCsh(:, 1));
+plot(df, PSCsh(:, 1));
 hold on;
 % x = 1:1:length(PSCsh(:,length( PSC )));
 % y = -1*ones(1,length(PSCsh(:,length( PSC ))));
@@ -50,8 +51,8 @@ hold on;
 xlabel('F, Hz');
 ylabel('P, dB');
 title('ACF, when delta(t) = 0');
-xt = get(gca, 'XTick');% 'XTick' Values
-set(gca, 'XTick', xt, 'XTickLabel', xt*dF - dFmax); 
+% xt = get(gca, 'XTick');% 'XTick' Values
+% set(gca, 'XTick', xt, 'XTickLabel', xt*dF - dFmax); 
 grid on;
 %%
 matr = zeros(121,2045);

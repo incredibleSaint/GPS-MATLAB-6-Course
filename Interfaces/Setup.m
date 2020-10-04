@@ -11,7 +11,7 @@ function Params = Setup()
 	% Выбор типа обработки - устанавливается для StartProcNum = 1, чтобы
 	%   не быть случайно изменённым в дальнейшем
     % 'Coh'/'NonCoh' - когерентная обработка / некогерентная обработка
-        Main.ProcessType = 'NonCoh';
+        Main.ProcessType = 'NonCoh';%'NonCoh'
 
     % Флаг необходимости прорисовки результатов
         Main.isDraw = 3; % 0 - не рисовать; 1 - рисовать; 2 - рисовать и
@@ -19,7 +19,7 @@ function Params = Setup()
 
     % Выбор имени файла-записи
         % Директория с файлами-записями
-            Main.SigDirName = 'C:\Users\Incredible\Desktop\Studies\Programming\MATLAB\NIR\GPS\Signal\';
+            Main.SigDirName = 'D:\Windows\Programming\Matlab\GNSS\GPS-MATLAB-6-Course\Signals\';
         % Имя файла-записи
             Main.SigFileName = '30_08_2018__19_38_33_x02_1ch_16b_15pos_90000ms.dat';
 
@@ -65,7 +65,7 @@ function Params = Setup()
     % Количество периодов CA-кода между соседними синхронизациями по
     % времени (NumCA2NextSync >= 1, NumCA2NextSync = 1 - синхронизация для
     % каждого CA-кода)
-        P20_NonCohTrackSatsAndBitSync.NumCA2NextSync = 100;
+        P20_NonCohTrackSatsAndBitSync.NumCA2NextSync = 1;
 
     % Половина количества дополнительных периодов CA-кода, используемых для
     % синхронизации по времени
@@ -73,14 +73,14 @@ function Params = Setup()
 
     % Количество учитываемых значений задержки/набега синхронизации по
     % времени
-        P20_NonCohTrackSatsAndBitSync.HalfCorLen = 2;
+        P20_NonCohTrackSatsAndBitSync.HalfCorLen = 40;
 
     % Период, с которым производится отображение числа обработанных
     % CA-кодов
         P20_NonCohTrackSatsAndBitSync.NumCA2Disp = 5*10^3;
 
     % Максимальное число обрабатываемых CA-кодов (inf - до конца файла!)
-        P20_NonCohTrackSatsAndBitSync.MaxNumCA2Process = inf;
+        P20_NonCohTrackSatsAndBitSync.MaxNumCA2Process = 1000;%inf;
 
     % Количество бит, используемых для битовой синхронизации
         P20_NonCohTrackSatsAndBitSync.NBits4Sync = 100;
