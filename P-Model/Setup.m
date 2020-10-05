@@ -81,7 +81,7 @@ function Params = Setup()
         P20_NonCohTrackSatsAndBitSync.NumCA2Disp = 5*10^3;
 
     % Максимальное число обрабатываемых CA-кодов (inf - до конца файла!)
-        P20_NonCohTrackSatsAndBitSync.MaxNumCA2Process = inf;
+        P20_NonCohTrackSatsAndBitSync.MaxNumCA2Process = 5001;%inf;
 
     % Количество бит, используемых для битовой синхронизации
         P20_NonCohTrackSatsAndBitSync.NBits4Sync = 100;

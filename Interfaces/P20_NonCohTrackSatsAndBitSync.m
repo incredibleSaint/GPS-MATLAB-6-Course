@@ -86,7 +86,7 @@ function Res = P20_NonCohTrackSatsAndBitSync(inRes, Params)
         NumOfNeededSamples = necessMin;
     else
         NumOfNeededSamples = Res.File.SamplesLen;
-        MaxNumCA2Process = Res.File.SamplesLen / CALen - 2;
+        MaxNumCA2Process   = floor(Res.File.SamplesLen / CALen - 2);
     end
 
     sig = ReadSignalFromFile(inRes.File, ...
@@ -96,44 +96,122 @@ function Res = P20_NonCohTrackSatsAndBitSync(inRes, Params)
     
     for k = 1 : Res.Search.NumSats
         % Строка состояния
-            fprintf('%s     Трекинг спутника №%02d (%d из %d) ...\n', ...
-                datestr(now), Res.Search.SatNums(k), k, ...
-                Res.Search.NumSats);
-            
-            CA = GenCACode(Res.Search.SatNums(k));
-            CA = repelem(CA, Res.File.R);
-            CA = 2 * CA - 1;
-            dt = 1 / inRes.File.Fs0;
-            
-            
-            corr = zeros(MaxNumCA2Process, eplNumber);
-            for indCA = 1 : MaxNumCA2Process
+        fprintf('%s     Трекинг спутника №%02d (%d из %d) ...\n', ...
+            datestr(now), Res.Search.SatNums(k), k, ...
+            Res.Search.NumSats);
+
+        CA = GenCACode(Res.Search.SatNums(k));
+        CA = repelem(CA, Res.File.R);
+        CA = 2 * CA - 1;
+        dt = 1 / inRes.File.Fs0;
+        
+        cnt = 0;     % Счетчик обработанных СА-кодов
+                     % с момента последней синхронизации
+        dShift = 0;  % Текущий сдвиг синхронизации относильно начального
+        syncCnt = 0; % Счетчик синхронизаций
+        
+        syncCorr = zeros(floor(MaxNumCA2Process / NumCA2NextSync), ...
+                                                                eplNumber);
+        synchrCorrInd = zeros(1, MaxNumCA2Process);
+        corr    = zeros(1, MaxNumCA2Process);
+        corrAbs = zeros(1, MaxNumCA2Process);
+        phaseCA = zeros(1, MaxNumCA2Process);
+        samplesShifts = zeros(1, MaxNumCA2Process);
+        
+        for indCA = 1 : MaxNumCA2Process
+            sigPart = ...
+                    sig((Res.Search.SamplesShifts(k)     + ... % начальный сдвиг из P10_NonCohSearchSats.m
+                                     (indCA -1) * CALen  + ... % индекс рассчитываемого CA-кода
+                                             (1 : CALen) + ... % сам массив CA-кода
+                                                    dShift )); % сдвиг синхронизации
+            sigCorrFreq = sigPart .* exp(1j * 2 * pi * ...
+               (-Res.Search.FreqShifts(k)) * dt * (1 : CALen));
+            corr(indCA) = sigCorrFreq * CA.';
+            phaseCA(indCA) = angle(corr(indCA)) / pi;
+            corrAbs(indCA) = abs(corr(indCA));
+
+            cnt = cnt + 1;
+            if cnt == NumCA2NextSync % it's time for synchronization
+                cnt = 0;
+                syncCnt =  syncCnt + 1;
+                
                 for epl = 1 : eplNumber
-                    for m = 1 : HalfNumCA4Sync
-                       sigPart = ...
-                                sig((Res.Search.SamplesShifts(k)    + ... % начальный сдвиг из P10_NonCohSearchSats
-                                NumCA2NextSync * (indCA -1) * CALen + ... % индекс рассчитываемого CA-кода
-                                                   (m -1) * CALen)  + ... % сдвиг при накоплении
-                                                   (1 : CALen)      + ... % сам массив CA-кода
-                                                    epl - 1 - HalfCorLen);% рассматриваемые задержки/набеги синхронизации
+                    for m = 1 : 2 * HalfNumCA4Sync % accumulation cycle
+                       sigPart =  sig((Res.Search.SamplesShifts(k) + ... % начальный сдвиг из P10_NonCohSearchSats.m
+                                               (indCA -1) * CALen  + ... % индекс рассчитываемого CA-кода
+                                                   (m -1) * CALen) + ... % сдвиг при накоплении
+                                                       (1 : CALen) + ... % сам массив CA-кода
+                                                            dShift + ... % сдвиг синхронизации
+                                                   epl - 1 - HalfCorLen);% рассматриваемые задержки/набеги синхронизации
                        sigCorrFreq = sigPart .* exp(1j * 2 * pi * ...
                            (-Res.Search.FreqShifts(k)) * dt * (1 : CALen));
-                       corr(indCA, epl) = corr(indCA, epl) + ...
+                       syncCorr(syncCnt, epl) = syncCorr(syncCnt, epl) + ...
                                                    abs(sigCorrFreq * CA.');
-
                     end
                 end
+                                           
+               [~, maxInd] = max(syncCorr(syncCnt, :));
+               if maxInd ~= eplNumber - HalfCorLen % do a synchr shift
+                   dShift = dShift + maxInd - (eplNumber - HalfCorLen);
+               end
+                           
             end
-            figure;
-            surf((corr));
-                
+            synchrCorrInd(indCA) = dShift;
+            samplesShifts(indCA) = Res.Search.SamplesShifts(k) + dShift + ...
+                                                       (indCA - 1) * CALen;
+        end
+        %---- Save Results ----
+        Track.SamplesShifts{k, 1} = samplesShifts;
+        Track.CorVals{k, 1}       = corr;
+        %---- Plot Results ----
+        figure;
+        subplot(3, 1, 1);
+        plot(corrAbs, '.-');
+        hold on;
+        p = plot(corrAbs, '.', 'MarkerIndices', ...
+                                    1 : NumCA2NextSync : length(phaseCA));
+        p.MarkerSize = 15;
+        p.MarkerEdgeColor = 'g';
+        grid on;
+        strBelow = ['Модуль корреляций с СA-кодами для спутника №', ...
+                                          num2str(Res.Search.SatNums(k))];
+        str = {'Некогерентный трекинг', strBelow};
+        title(str);
+        xlabel('Номер обработанного CA-кода');
+        
+        subplot(3, 1, 2);
+        p = plot(phaseCA, '.');
+        p.MarkerSize = 5;
+        hold on; 
+        p = plot(phaseCA, '.', 'MarkerIndices', ...
+                                    1 : NumCA2NextSync : length(phaseCA));
+        p.Color = [0 1 0];
+        p.MarkerSize = 15;
+        grid on;
+        title(['Фаза корреляций с периодами СА-кода для спутника №', ...
+                                          num2str(Res.Search.SatNums(k))]);
+        xlabel('Номер обработанного CA-кода');
+        ylabel('Фаза, \pi');                              
+        
+        subplot(3, 1, 3);
+        plot(synchrCorrInd, 'Marker', '.');
+        grid on;
+        hold on;
+        p = plot(synchrCorrInd, '.', 'MarkerIndices', ...
+                                    1 : NumCA2NextSync : length(phaseCA));
+        p.MarkerSize = 15;
+        p.MarkerEdgeColor = 'g';
+        title(['Кривая кумулятивного ухода синхронизации для спутника №', ...
+                                          num2str(Res.Search.SatNums(k))]);
+        xlabel('Номер обработанного CA-кода');
+        ylabel('Сдвиг в отсчетах F_{s0}');
         % Строка состояния
             fprintf('%s         Завершено.\n', datestr(now));
     end
     % Добавим новое поле с результатами в Res
-        Res.Track = Track;
+    Res.Track = Track;
 
-    % Строка состояния
+    % Строка состояния 
         fprintf('%s     Завершено.\n', datestr(now));    
 
 %% ОСНОВНАЯ ЧАСТЬ ФУНКЦИИ - БИТОВАЯ СИНХРОНИЗАЦИЯ
