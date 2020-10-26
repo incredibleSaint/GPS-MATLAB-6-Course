@@ -2,10 +2,10 @@ function Params = Setup()
 
 % Main
     % Номер процедуры, с которой надо начать выполнение Main
-        Main.StartProcNum = 2; %  1 <= StartProcNum <= length(FuncNames)
+        Main.StartProcNum = 4; %  1 <= StartProcNum <= length(FuncNames)
 
     % Номер процедуры, на которой надо закончить выполнение Main
-        Main.StopProcNum = 7; %  1 <= StopProcNum <= length(FuncNames) и
+        Main.StopProcNum = 4; %  1 <= StopProcNum <= length(FuncNames) и
             % StartProcNum <= StopProcNum
 
 	% Выбор типа обработки - устанавливается для StartProcNum = 1, чтобы
@@ -73,14 +73,14 @@ function Params = Setup()
 
     % Количество учитываемых значений задержки/набега синхронизации по
     % времени
-        P20_NonCohTrackSatsAndBitSync.HalfCorLen = 2;
+        P20_NonCohTrackSatsAndBitSync.HalfCorLen = 1;
 
     % Период, с которым производится отображение числа обработанных
     % CA-кодов
         P20_NonCohTrackSatsAndBitSync.NumCA2Disp = 5*10^3;
 
     % Максимальное число обрабатываемых CA-кодов (inf - до конца файла!)
-        P20_NonCohTrackSatsAndBitSync.MaxNumCA2Process = 5000;%inf;
+        P20_NonCohTrackSatsAndBitSync.MaxNumCA2Process = inf;%2009;%inf;
 
     % Количество бит, используемых для битовой синхронизации
         P20_NonCohTrackSatsAndBitSync.NBits4Sync = 100;

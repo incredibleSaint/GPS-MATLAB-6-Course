@@ -1,3 +1,5 @@
 *.dat
 *.fig
 *.asv
+*.mat
+*.emf

@@ -33,7 +33,7 @@ function Res = P20_NonCohTrackSatsAndBitSync(inRes, Params)
         'Cors', zeros(Res.Search.NumSats, 20) ...
     );
     % Каждый элемент массива CAShifts - количество периодов CA-кода,
-    %   которые надо пропустить до начала бита.
+     %   которые надо пропустить до начала бита.
     % Каждая строка массива Cors - корреляции, по позиции минимума которых
     %   определяется битовая синхронизация.
 
@@ -163,6 +163,11 @@ function Res = P20_NonCohTrackSatsAndBitSync(inRes, Params)
         %---- Save Results ----
         Track.SamplesShifts{k, 1} = samplesShifts;
         Track.CorVals{k, 1}       = corr;
+        
+        mult = corr(2 : end) .* conj(corr(1 : end - 1));
+        figure; plot(angle(mult) / pi);
+        title(['Разность фаз соседних корреляций для спутника №', ...
+                                        num2str(Res.Search.SatNums(k))]);
         %---- Plot Results ----
         figure;
         subplot(3, 1, 1);
@@ -215,3 +220,18 @@ function Res = P20_NonCohTrackSatsAndBitSync(inRes, Params)
         fprintf('%s     Завершено.\n', datestr(now));    
 
 %% ОСНОВНАЯ ЧАСТЬ ФУНКЦИИ - БИТОВАЯ СИНХРОНИЗАЦИЯ
+
+numOfCAInBit = 20;
+numOfCA = NBits4Sync * numOfCAInBit;
+bitSync = zeros(Res.Search.NumSats, numOfCAInBit);
+for k = 1 : Res.Search.NumSats
+    corr = Track.CorVals{k, 1};
+    phaseDiff = corr(2 : numOfCA + 1) .* conj(corr(1 : numOfCA));
+    bitSync(k, :) = abs(sum(reshape(phaseDiff, numOfCAInBit, NBits4Sync), ...
+                                                                       2));
+    figure; plot(bitSync(k, :));
+    [~, BitSync.CAShifts(k, 1)] = min(bitSync(k, :));
+end
+BitSync.Cors = bitSync;
+Res.BitSync = BitSync;
+fprintf('%s     Завершена битовая синхронизация.\n', datestr(now));  
