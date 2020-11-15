@@ -8,7 +8,7 @@ close all;
         % Определим содержимое рабочей директории
             Listing = dir;
         % Подготовка к циклу
-            isFind = false;
+             isFind = false;
             NumFinds = 0;
         % Цикл по количеству элементов, содержащихся в директории
             for k = 1:length(Listing)
@@ -23,7 +23,7 @@ close all;
                     isFind = true;
                     NumFinds = NumFinds + 1;
                 end
-                end
+                end 
                 end
             end
 
