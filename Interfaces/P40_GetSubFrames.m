@@ -52,7 +52,7 @@ for k = 1 : Res.Search.NumSats
 end
 SubFrames.isSubFrameSync = isOk;
 SubFrames.BitSeqNum = BitSeqNum;
-SubFrames.BitShift = BitShift;
+SubFrames.BitShift = BitShift -1; % -1 for next convenience
 Res.SubFrames = SubFrames;
 end
 function words = CheckFrames(rawBits, BitShift)
@@ -125,7 +125,7 @@ for m = 1 : sizeBits(1)
 
     convol = abs(conv(bits(1 + 2 : numBitsForConv + 2), ... % '+ 2' - because if preambule in bits(1 : 8), 
                                      fliplr(conj(preamble)), 'valid'));% then we need previous 2 bits (D*_29, D*_30, to eliminate ambiguity),
-                                                                       % which we don't have at all (bits(-1), bits(0))
+                                                                       % which we don't have at all (with indexes: bits(-1), bits(0))
     if isDraw
         figure; plot(convol);
     end

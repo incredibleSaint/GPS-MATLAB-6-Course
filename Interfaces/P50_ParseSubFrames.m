@@ -124,14 +124,16 @@ function Data = ParseSF1(words)
 
 % Парсинг подкадра №1
 Data = struct;
-Data.weekNumber = bi2de(words(61 : 70), 'left-msb');
-Data.CAorPCodeOn = bi2de(words(71 : 72), 'left-msb');
-Data.UraIndex = words(73 : 76);
-Data.svHealth = words(77 : 82);
+Data.WeekNumber = bi2de(words(61 : 70), 'left-msb');
+Data.CodesOnL2 = bi2de(words(71 : 72), 'left-msb');
+Data.URA = num2str(words(73 : 76));
+Data.URA_in_meters = num2str(Data.URA);
+Data.SV_Health_Summary = num2str(words(77 : 82));
+Data.SV_Health = num2str(words(77 : 82));
 Data.IODC = bi2de([words(83 : 84) words(211 : 218)], 'left-msb');
-Data.L2PDataFlag = words(91);
+Data.L2_P_Data_Flag = words(91);
 
-Data.Tgd = 2 ^ -31 * twoSComplement(words(197 : 204));
+Data.T_GD = 2 ^ -31 * twoSComplement(words(197 : 204));
 
 Data.t_oc = 2 ^   4 * bi2de(words(219 : 234), 'left-msb');
 Data.a_f2 = 2 ^ -55 * twoSComplement(words(241 : 248));
@@ -145,7 +147,7 @@ function Data = ParseSF2(words)
 % Парсинг подкадра №2
 Data.IODE  = bi2de(words(61 : 68), 'left-msb');
 Data.C_rs  = 2 ^ -5 * twoSComplement(words(69 : 84));
-Data.dn    = 2 ^ -43 * twoSComplement(words(91 : 106));
+Data.Delta_n    = 2 ^ -43 * twoSComplement(words(91 : 106));
 Data.M_0   = 2 ^ -31 * twoSComplement([words(107 : 114) words(121 : 144)]);
 Data.C_uc  = 2 ^ -29 * twoSComplement(words(151 : 166));
 Data.ecc   = 2 ^ -33 * bi2de([words(167 : 174) words(181 : 204)], ...
@@ -154,7 +156,7 @@ Data.C_us  = 2 ^ -29 * twoSComplement(words(211 : 226));
 Data.sqrtA = 2 ^ -19 * bi2de([words(227 : 234) words(241 : 264)], ...
                                                                'left-msb');
 Data.t_oe  = 2 ^ 4   * bi2de(words(271 : 286), 'left-msb');
-Data.FitIntervalFlag = words(287);
+Data.Fit_Interval_Flag = words(287);
 
 AODO  = bi2de(words(288 : 292), 'left-msb');
 Data.AODO = AODO;
@@ -167,12 +169,12 @@ function Data = ParseSF3(words)
 %
 % Парсинг подкадра №3
 Data.C_ic = 2 ^ -29 * twoSComplement(words(61 : 76));
-Data.OMEGA_0 = 2 ^ -31 * twoSComplement([words(77 : 84) words(91 : 114)]);
+Data.Omega_0 = 2 ^ -31 * twoSComplement([words(77 : 84) words(91 : 114)]);
 Data.C_is = 2 ^ -29 * twoSComplement(words(121 : 136));
 Data.i_0  = 2 ^ -31 * twoSComplement([words(137 : 144) words(151 : 174)]);
 Data.C_rc = 2 ^ -5 * twoSComplement(words(181 : 196));
-Data.w = 2 ^ -31 * twoSComplement([words(197 : 204) words(211 : 234)]);
-Data.OMEGA_dot = 2 ^ -43 * twoSComplement(words(241 : 264));
+Data.omega = 2 ^ -31 * twoSComplement([words(197 : 204) words(211 : 234)]);
+Data.DOmega = 2 ^ -43 * twoSComplement(words(241 : 264));
 Data.IODE = bi2de(words(271 : 278), 'left-msb');
 Data.IDOT = 2 ^-43 * twoSComplement(words(279 : 292));
 end
