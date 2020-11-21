@@ -15,7 +15,7 @@ function Res = P70_GetRXPoses(inRes, Params)
 
 %% ИНИЦИАЛИЗАЦИЯ РЕЗУЛЬТАТА
     % Positioning = struct(  ...
-    %   'RXPoses', cell(N, M), ...
+    %   'RX+Poses', cell(N, M), ...
     %   'CAStep', CAStep, ...
     %   'isCommonRxTime', isCommonRxTime ...
     % );
@@ -68,10 +68,26 @@ function Res = P70_GetRXPoses(inRes, Params)
         end
     
 %% РАСЧЁТ КООРДИНАТ
-
-P71_GetOneRXPos
-P76_ExportResults
-
+% CurSatNums2Pos = ;
+sizeOfEph = size(Res.Ephemeris);
+for m = 1 : sizeOfEph(1)
+    %--- Определение времени GPS для расчета: ----
+    inGPSTimes = zeros(1, CurSatNums2Pos(end));
+    inTimeShifts = zeros(1, CurSatNums2Pos(end));
+    SampleNums = zeros(1, CurSatNums2Pos(end));
+    Es = cell(1, CurSatNums2Pos(end));
+    for k = CurSatNums2Pos
+%         strHOW = Res.SatsData.HOW{k, 1};
+        inGPSTimes(k) = Res.Ephemeris{m, k}.TOW;
+        Es{1, k} = Res.Ephemeris{m, k};
+    end
+    %---------------------------------
+    Params.CurSatNums2Pos = CurSatNums2Pos;
+%     Es{1, :} = Res.Ephemeris{m, :};
+    UPos = P71_GetOneRXPos(Es, inGPSTimes, inTimeShifts,...); 
+                                                   SampleNums, Params);
+%     P76_ExportResults
+end
 end
 
 function tGPS = GettGPS(SampleNum, SamplesNums, RefCANum, RefTOW, dt)
@@ -92,4 +108,15 @@ function tGPS = GettGPS(SampleNum, SamplesNums, RefCANum, RefTOW, dt)
 
 % Константы
     TCA = 10^-3;
+    indLessThanSampleNum = SampleNums < SampleNum;
+    indBiggerThanSampleNum = SampleNums > SampleNum;
+    SampleNumsLess = SampleNums(indLessThanSampleNum);
+    SampleNumsBigger = SampleNums(indBiggerThanSampleNum);
+    diffLess = SampleNum - SampleNumsLess(end);
+    diffBigger = SampleNumsBigger(1) - SampleNum;
+    if diffLess < diffBigger
+       startCASample = SampleNumsLess(end);
+       
+    end
+    tGPS = RefTOW * 6 + (
 end

@@ -2,10 +2,10 @@ function Params = Setup()
 
 % Main
     % Ќомер процедуры, с которой надо начать выполнение Main
-        Main.StartProcNum = 6; %  1 <= StartProcNum <= length(FuncNames)
+        Main.StartProcNum = 7; %  1 <= StartProcNum <= length(FuncNames)
 
     % Ќомер процедуры, на которой надо закончить выполнение Main
-        Main.StopProcNum = 6; %  1 <= StopProcNum <= length(FuncNames) и
+        Main.StopProcNum = 7; %  1 <= StopProcNum <= length(FuncNames) и
             % StartProcNum <= StopProcNum
 
 	% ¬ыбор типа обработки - устанавливаетс€ дл€ StartProcNum = 1, чтобы
@@ -168,7 +168,7 @@ function Params = Setup()
     % 'all' - все спутники;
     % 'firstX' - первые ’ спутников, например 'first5';
     % [1, 2, 5, 7] - конкретные номера.
-        P70_GetRXPoses.SatNums2Pos = 'first6';
+        P70_GetRXPoses.SatNums2Pos = 'first9';
 
 % P71_GetOneRXPos
     % ћаксимальное число итераций
