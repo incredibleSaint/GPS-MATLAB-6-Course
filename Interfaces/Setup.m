@@ -168,7 +168,7 @@ function Params = Setup()
     % 'all' - все спутники;
     % 'firstX' - первые ’ спутников, например 'first5';
     % [1, 2, 5, 7] - конкретные номера.
-        P70_GetRXPoses.SatNums2Pos = 'first9';
+        P70_GetRXPoses.SatNums2Pos = 'first7';
 
 % P71_GetOneRXPos
     % ћаксимальное число итераций

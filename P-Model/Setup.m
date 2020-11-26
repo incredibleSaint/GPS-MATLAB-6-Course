@@ -2,7 +2,7 @@ function Params = Setup()
 
 % Main
     % Номер процедуры, с которой надо начать выполнение Main
-        Main.StartProcNum = 5; %  1 <= StartProcNum <= length(FuncNames)
+        Main.StartProcNum = 4; %  1 <= StartProcNum <= length(FuncNames)
 
     % Номер процедуры, на которой надо закончить выполнение Main
         Main.StopProcNum = 7; %  1 <= StopProcNum <= length(FuncNames) и
@@ -168,7 +168,7 @@ function Params = Setup()
     % 'all' - все спутники;
     % 'firstX' - первые Х спутников, например 'first5';
     % [1, 2, 5, 7] - конкретные номера.
-        P70_GetRXPoses.SatNums2Pos = 'first6';
+        P70_GetRXPoses.SatNums2Pos = 'first7';
 
 % P71_GetOneRXPos
     % Максимальное число итераций

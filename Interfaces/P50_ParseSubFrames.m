@@ -176,7 +176,7 @@ Data.C_rc = 2 ^ -5 * twoSComplement(words(181 : 196));
 Data.omega = 2 ^ -31 * twoSComplement([words(197 : 204) words(211 : 234)]);
 Data.DOmega = 2 ^ -43 * twoSComplement(words(241 : 264));
 Data.IODE = bi2de(words(271 : 278), 'left-msb');
-Data.IDOT = 2 ^-43 * twoSComplement(words(279 : 292));
+Data.IDOT = 2 ^ -43 * twoSComplement(words(279 : 292));
 end
 
 function Data = ParseSF4(Words)

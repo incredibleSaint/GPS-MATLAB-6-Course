@@ -35,7 +35,9 @@ function Res = P70_GetRXPoses(inRes, Params)
     % в подкадре 6000 периодов CA-кода, поэтому, например, CAStep = 1000
     % приведёт к вычислению 6 координат за один подкадр.
         CAStep = Params.P70_GetRXPoses.CAStep;
-        
+        CAInSbfr = 20 * 300;
+        numCompsForSubfr = floor(CAInSbfr / CAStep);
+        numCAIn1Sec = 1e3;
     % Вариант вычисления координат.
     % isCommonRxTime = 1 - координаты спутников вычисляются в одинаковый
     %   момент  времени приёмника, соответствующий разным меткам
@@ -69,24 +71,68 @@ function Res = P70_GetRXPoses(inRes, Params)
     
 %% РАСЧЁТ КООРДИНАТ
 % CurSatNums2Pos = ;
+
+% найти начало первого подкадра пришедшего последним сигнала 
+% это будет первый SampleNum, для которого будем вычислять позицию
+[CAIndexOfStartSbfr, sampleNumOfStartSubfr] = FindSubframeStart(Res);
+startSampleNum = max(sampleNumOfStartSubfr(CurSatNums2Pos));
+
 sizeOfEph = size(Res.Ephemeris);
+sampleNum = startSampleNum;
+% startSampleNum = 7126205;
+% numCompsForSubfr = 6;
 for m = 1 : sizeOfEph(1)
+    for n = 1 : numCompsForSubfr
     %--- Определение времени GPS для расчета: ----
-    inGPSTimes = zeros(1, CurSatNums2Pos(end));
-    inTimeShifts = zeros(1, CurSatNums2Pos(end));
-    SampleNums = zeros(1, CurSatNums2Pos(end));
-    Es = cell(1, CurSatNums2Pos(end));
-    for k = CurSatNums2Pos
-%         strHOW = Res.SatsData.HOW{k, 1};
-        inGPSTimes(k) = Res.Ephemeris{m, k}.TOW;
-        Es{1, k} = Res.Ephemeris{m, k};
+    lenSatNums = length(CurSatNums2Pos);
+    inGPSTimes = zeros(1, lenSatNums);
+    inTimeShifts = zeros(1, lenSatNums);
+    SamplesNums = zeros(1, lenSatNums);
+    Es = cell(1, lenSatNums);
+    for k = 1 : lenSatNums
+        samplesShifts = Res.Track.SamplesShifts{CurSatNums2Pos(k), 1};
+%         RefCANum = CAIndexOfStartSbfr(CurSatNums2Pos(k)) + (m - 1) * CAInSbfr;
+        RefCANum = Res.Ephemeris{m, k}.CANum;
+%         sampleNum = (m - 1) * CAInSbfr + startSampleNum + (n - 1) * CAStep * ...
+%                                                 Res.File.Fs / numCAIn1Sec;
+        sampleNum = startSampleNum + 2046 * CAStep * ((m - 1) * numCompsForSubfr + (n - 1));
+%         sampleNum = 7126205;
+        inGPSTimes(k) = GettGPS(sampleNum, samplesShifts, RefCANum, ...
+                              Res.Ephemeris{m, CurSatNums2Pos(k)}.TOW, dt);
+        Es{1, k} = Res.Ephemeris{m, CurSatNums2Pos(k)};
+        SamplesNums(k) = sampleNum;
     end
     %---------------------------------
-    Params.CurSatNums2Pos = CurSatNums2Pos;
+    
+    %---------------------------------
+    Params.CurSatNums2Pos  = CurSatNums2Pos;
+    inTimeShifts = inGPSTimes(1) - inGPSTimes;
 %     Es{1, :} = Res.Ephemeris{m, :};
-    UPos = P71_GetOneRXPos(Es, inGPSTimes, inTimeShifts,...); 
-                                                   SampleNums, Params);
+    UPos{m, n} = P71_GetOneRXPos(Es, inGPSTimes, inTimeShifts,...); 
+                                                   SamplesNums, Params);
+    UPos{m, n}.tGPS = inGPSTimes;
+    
+    end
 %     P76_ExportResults
+
+end
+Res.Positioning.RXPoses = UPos;
+P76_ExportResults(UPos, Params);
+end
+
+function [CAIndexOfStartSbfr, sampleNumOfStartSubfr] = ...
+                                                     FindSubframeStart(Res)
+% найти начало первого подкадра пришедшего последним сигнала 
+% это будет первый SampleNum, для которого будем вычислять позицию
+CANumInBit = 20; 
+CAIndexOfStartSbfr = zeros(1, Res.Search.NumSats);
+sampleNumOfStartSubfr = zeros(1, Res.Search.NumSats);
+
+for k = 1 : Res.Search.NumSats 
+    CAIndexOfStartSbfr(k) = (Res.BitSync.CAShifts(k) ) + ...%+ 1) + ...
+                                    Res.SubFrames.BitShift(k) * CANumInBit;
+    samplesShifts = Res.Track.SamplesShifts{k, 1};
+    sampleNumOfStartSubfr(k) = samplesShifts(CAIndexOfStartSbfr(k));
 end
 end
 
@@ -108,15 +154,26 @@ function tGPS = GettGPS(SampleNum, SamplesNums, RefCANum, RefTOW, dt)
 
 % Константы
     TCA = 10^-3;
-    indLessThanSampleNum = SampleNums < SampleNum;
-    indBiggerThanSampleNum = SampleNums > SampleNum;
-    SampleNumsLess = SampleNums(indLessThanSampleNum);
-    SampleNumsBigger = SampleNums(indBiggerThanSampleNum);
+    indLessThanSampleNum = SamplesNums < SampleNum;
+    indBiggerThanSampleNum = SamplesNums > SampleNum;
+    SampleNumsLess = SamplesNums(indLessThanSampleNum);
+    SampleNumsBigger = SamplesNums(indBiggerThanSampleNum);
     diffLess = SampleNum - SampleNumsLess(end);
     diffBigger = SampleNumsBigger(1) - SampleNum;
+    NearestCANum = length(SampleNumsLess);
     if diffLess < diffBigger
-       startCASample = SampleNumsLess(end);
-       
+       CAStartSample = SampleNumsLess(end);
+    elseif diffLess > diffBigger
+        CAStartSample = SampleNumsBigger(1);
+        NearestCANum = NearestCANum + 1;
+        if diffLess == 2046 
+            NearestCANum = NearestCANum + 1;
+        end
+    elseif diffLess == diffBigger
+        CAStartSample = SampleNum;
+        NearestCANum = NearestCANum + 1;
     end
-    tGPS = RefTOW * 6 + (
+%     NearestCANum = length(SampleNumsLess);
+    tGPS = (RefTOW - 1) * 6 + (NearestCANum - RefCANum) * TCA + ...% (RefTOW - 1): because this TOW value for next subframe, not current
+                                    (SampleNum - CAStartSample) * dt;
 end
