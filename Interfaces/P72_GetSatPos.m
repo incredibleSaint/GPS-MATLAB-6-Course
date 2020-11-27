@@ -7,9 +7,12 @@ function [SatPos, GPSTime, TProp] = P72_GetSatPos(Data, inGPSTime, ...
 %
 % Входные переменные
 %   Data - структура, содержащая, как минимум, параметры подкадров 1, 2 и
-%     3;
+%     3; 
+%   Parameters like Data.Delta_n, Data.M_0 should be in semicircles.
+%   It multiply by PI in function (transform to radian).
 %   inGPSTime - время испускания сигнала;
 %   inTProp - время распространения сигнала.
+
 %
 % Выходные переменные
 %   SatPos - массив (8х1) координат и параметров спутника для пересчёта
@@ -36,7 +39,7 @@ GPSTime = inGPSTime - delta_t_sv;
 % GPSTime(Transmit)           Receiving time 
 % ---|----------------------------|-----------------------
 %     \__________TProp___________/
-TProp = 68e-3 + inTProp + delta_t_sv;
+TProp = inTProp + delta_t_sv;
 
 %--- end Time Correction -----------------------
 

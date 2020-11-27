@@ -19,7 +19,7 @@ function Params = Setup()
 
     % Выбор имени файла-записи
         % Директория с файлами-записями
-            Main.SigDirName = 'D:\Windows\Programming\Matlab\GNSS\GPS-MATLAB-6-Course\Signals\';
+            Main.SigDirName = 'C:\Users\Incredible\Desktop\Studies\Programming\MATLAB\GPS\GPS-MATLAB-6-Course\Signal\';
         % Имя файла-записи
             Main.SigFileName = '30_08_2018__19_38_33_x02_1ch_16b_15pos_90000ms.dat';
 
