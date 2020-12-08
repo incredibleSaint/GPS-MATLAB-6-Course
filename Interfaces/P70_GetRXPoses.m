@@ -70,33 +70,33 @@ function Res = P70_GetRXPoses(inRes, Params)
         end
     
 %% РАСЧЁТ КООРДИНАТ
-% CurSatNums2Pos = ;
 
-% найти начало первого подкадра пришедшего последним сигнала 
+lenSatNums = length(CurSatNums2Pos);
+
+% Найти начало первого подкадра пришедшего последним сигнала 
 % это будет первый SampleNum, для которого будем вычислять позицию
-[CAIndexOfStartSbfr, sampleNumOfStartSubfr] = FindSubframeStart(Res);
+[CAIndexOfStartSbfr, sampleNumOfStartSubfr] = FindSubframeStart(Res, ...
+                                                            lenSatNums);
 startSampleNum = max(sampleNumOfStartSubfr(CurSatNums2Pos));
 
 sizeOfEph = size(Res.Ephemeris);
 sampleNum = startSampleNum;
-% startSampleNum = 7126205;
-% numCompsForSubfr = 6;
+
 for m = 1 : sizeOfEph(1)
     for n = 1 : numCompsForSubfr
     %--- Определение времени GPS для расчета: ----
-    lenSatNums = length(CurSatNums2Pos);
+    
     inGPSTimes = zeros(1, lenSatNums);
     inTimeShifts = zeros(1, lenSatNums);
     SamplesNums = zeros(1, lenSatNums);
     Es = cell(1, lenSatNums);
     for k = 1 : lenSatNums
         samplesShifts = Res.Track.SamplesShifts{CurSatNums2Pos(k), 1};
-%         RefCANum = CAIndexOfStartSbfr(CurSatNums2Pos(k)) + (m - 1) * CAInSbfr;
+
         RefCANum = Res.Ephemeris{m, k}.CANum;
-%         sampleNum = (m - 1) * CAInSbfr + startSampleNum + (n - 1) * CAStep * ...
-%                                                 Res.File.Fs / numCAIn1Sec;
+
         sampleNum = startSampleNum + 2046 * CAStep * ((m - 1) * numCompsForSubfr + (n - 1));
-%         sampleNum = 7126205;
+
         inGPSTimes(k) = GettGPS(sampleNum, samplesShifts, RefCANum, ...
                               Res.Ephemeris{m, CurSatNums2Pos(k)}.TOW, dt);
         Es{1, k} = Res.Ephemeris{m, CurSatNums2Pos(k)};
@@ -107,7 +107,6 @@ for m = 1 : sizeOfEph(1)
     %---------------------------------
     Params.CurSatNums2Pos  = CurSatNums2Pos;
     inTimeShifts = inGPSTimes(1) - inGPSTimes;
-%     Es{1, :} = Res.Ephemeris{m, :};
     UPos{m, n} = P71_GetOneRXPos(Es, inGPSTimes, inTimeShifts,...); 
                                                    SamplesNums, Params);
     UPos{m, n}.tGPS = inGPSTimes;
@@ -121,14 +120,14 @@ P76_ExportResults(UPos, Params);
 end
 
 function [CAIndexOfStartSbfr, sampleNumOfStartSubfr] = ...
-                                                     FindSubframeStart(Res)
+                                         FindSubframeStart(Res, lenSatNums)
 % найти начало первого подкадра пришедшего последним сигнала 
 % это будет первый SampleNum, для которого будем вычислять позицию
 CANumInBit = 20; 
 CAIndexOfStartSbfr = zeros(1, Res.Search.NumSats);
 sampleNumOfStartSubfr = zeros(1, Res.Search.NumSats);
 
-for k = 1 : Res.Search.NumSats 
+for k = 1 : lenSatNums 
     CAIndexOfStartSbfr(k) = (Res.BitSync.CAShifts(k) ) + ...%+ 1) + ...
                                     Res.SubFrames.BitShift(k) * CANumInBit;
     samplesShifts = Res.Track.SamplesShifts{k, 1};

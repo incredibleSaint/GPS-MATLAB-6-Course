@@ -11,7 +11,7 @@ function Params = Setup()
 	% Выбор типа обработки - устанавливается для StartProcNum = 1, чтобы
 	%   не быть случайно изменённым в дальнейшем
     % 'Coh'/'NonCoh' - когерентная обработка / некогерентная обработка
-        Main.ProcessType = 'NonCoh';%'NonCoh'
+        Main.ProcessType = 'Coh';%'NonCoh'
 
     % Флаг необходимости прорисовки результатов
         Main.isDraw = 3; % 0 - не рисовать; 1 - рисовать; 2 - рисовать и
@@ -19,7 +19,7 @@ function Params = Setup()
 
     % Выбор имени файла-записи
         % Директория с файлами-записями
-            Main.SigDirName = 'C:\Users\Incredible\Desktop\Studies\Programming\MATLAB\GPS\GPS-MATLAB-6-Course\Signal\';
+            Main.SigDirName = 'D:\Windows\Programming\Matlab\GNSS\GPS-MATLAB-6-Course\Signals';
         % Имя файла-записи
             Main.SigFileName = '30_08_2018__19_38_33_x02_1ch_16b_15pos_90000ms.dat';
 
@@ -168,7 +168,7 @@ function Params = Setup()
     % 'all' - все спутники;
     % 'firstX' - первые Х спутников, например 'first5';
     % [1, 2, 5, 7] - конкретные номера.
-        P70_GetRXPoses.SatNums2Pos = 'first7';
+        P70_GetRXPoses.SatNums2Pos = [1 2 3 4 5 6 7 8 9]; %;'first5';
 
 % P71_GetOneRXPos
     % Максимальное число итераций

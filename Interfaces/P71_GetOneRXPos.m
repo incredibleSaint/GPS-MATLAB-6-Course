@@ -57,7 +57,7 @@ function UPos = P71_GetOneRXPos(Es, inGPSTimes, inTimeShifts, ...
     % Initial guess about pseudoranges (in sec):
     initGuess = startInTProp + inTimeShifts;
 
-    SatPos  = zeros(length(Params.CurSatNums2Pos), 7);
+    SatPos  = zeros(7, length(Params.CurSatNums2Pos));
     GPSTime = zeros(1, length(Params.CurSatNums2Pos));
     TProp   = zeros(1, length(Params.CurSatNums2Pos));
     
@@ -116,7 +116,8 @@ while(dvMax < dv && CntMax > cnt)
     zU = zU + dNow(3);
     cT0 = cT0 + dNow(4);
     for k = 1 : length(Params.CurSatNums2Pos)
-        TPropNew = (cT0 + c * TPropStart(CurSatNums2Pos(k))) / c;
+%         TPropNew = (cT0 + c * TPropStart(CurSatNums2Pos(k))) / c;
+        TPropNew = (cT0 + c * TPropStart((k))) / c;
         OutSatPos = P73_RenewSatPos(SatPos(:, k), TPropNew, Params);
         SatPos(:, k) = OutSatPos;
     end
