@@ -2,7 +2,7 @@ clc;
 clear all;
 close all;
 
-File.Name = 'X:\Методические материалы\СНС\MATLAB\Signals\28_01_2019__17_02_51_x02_1ch_16b_15pos_200000ms.dat';
+File.Name = 'X:\РњРµС‚РѕРґРёС‡РµСЃРєРёРµ РјР°С‚РµСЂРёР°Р»С‹\РЎРќРЎ\MATLAB\Signals\28_01_2019__17_02_51_x02_1ch_16b_15pos_200000ms.dat';
 File.HeadLenInBytes = 0;
 File.NumOfChannels = 1;
 File.ChanNum = 0;
